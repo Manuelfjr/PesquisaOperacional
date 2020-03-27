@@ -1,0 +1,140 @@
+model cam_min
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+parameters
+	PROJECTDIR='C:\Users\anaflavia\ufpb\2017.2\Pesquisa Operacional\modelos mosel AF'
+end-parameters
+
+(!
+declarations
+	nos: range
+	origem=1
+	destino=6
+	meio=2..5
+	tudo=1..6
+	arcos:dynamic array(nos,nos) of integer
+	x: dynamic array(nos,nos) of mpvar
+end-declarations
+
+initializations from 'caminho-min1.txt'
+	arcos
+end-initializations
+
+forall(i,j in tudo | exists(arcos(i,j))) create(x(i,j))
+
+- sum(i in meio) x(origem,i) = -1
+
+sum (j in meio) x(j,destino) = 1
+
+forall(i in meio) do
+	sum(k in nos)x(k,i) = sum(j in nos) x(i,j)
+end-do
+
+custo:= sum(i in tudo, j in tudo) arcos(i,j)*x(i,j)
+
+minimize(custo)
+
+writeln("Begin running model")
+forall(i in tudo, j in tudo | exists(arcos(i,j))) do
+	writeln("valor(",i,j,")= ",getsol(x(i,j)))
+end-do
+
+writeln("FO: ",getobjval)
+writeln("End running model")
+
+exportprob(EP_MIN,"",custo)
+
+!)
+
+(!
+declarations
+	nos: range
+	origem=1
+	destino=7
+	meio=2..6
+	tudo=1..7
+	arcos:dynamic array(nos,nos) of integer
+	x: dynamic array(nos,nos) of mpvar
+end-declarations
+
+initializations from 'caminho-min2.txt'
+	arcos
+end-initializations
+
+forall(i,j in tudo | exists(arcos(i,j))) create(x(i,j))
+
+- sum(i in meio) x(origem,i) = -1
+
+sum (j in meio) x(j,destino) = 1
+
+forall(i in meio) do
+	sum(k in nos)x(k,i) = sum(j in nos) x(i,j)
+end-do
+
+custo:= sum(i in tudo, j in tudo) arcos(i,j)*x(i,j)
+
+minimize(custo)
+
+writeln("Begin running model")
+forall(i in tudo, j in tudo | exists(arcos(i,j))) do
+	writeln("valor(",i,j,")= ",getsol(x(i,j)))
+end-do
+
+writeln("FO: ",getobjval)
+writeln("End running model")
+
+exportprob(EP_MIN,"",custo)
+!)
+
+model transbordo
+uses "mmxprs";
+!sample declarations section
+
+declarations
+	OFE=1..2
+	FINAL=8..10
+	MEIO=3..7
+	TUDO=1..10
+	nos: range
+	flow: dynamic array(nos,nos) of mpvar
+	custos: dynamic array(nos,nos) of real
+	oferta: array(OFE) of real
+	demanda: array(FINAL) of real
+end-declarations
+
+initializations from 'transbordo.txt'
+	custos oferta demanda
+end-initializations
+
+forall(i,j in nos | exists(custos(i,j))) create(flow(i,j))
+!nós de oferta
+forall (k in OFE) do
+	-sum(j in MEIO | exists(custos(k,j))) flow(k,j) <= - oferta(k)
+end-do
+
+forall (k in FINAL) do
+	sum(j in MEIO | exists(custos(j,k)))flow(j,k) >= demanda(k)
+end-do
+
+forall(i in MEIO) do
+	sum(k in nos | exists(custos(k,i)))flow(k,i) = sum(j in nos | exists(custos(i,j))) flow(i,j)
+end-do
+
+custo:=sum(k in TUDO, j in TUDO | exists(custos(k,j))) custos(k,j)*flow(k,j)
+
+minimize(custo)
+
+writeln("Begin running model")
+
+forall(i in TUDO, j in TUDO | exists(custos(i,j))) do
+	writeln("valor(",i,j,")= ",getsol(flow(i,j)))
+end-do
+
+writeln("FO: ",getobjval)
+writeln("End running model")
+
+exportprob(EP_MIN,"",custo)
+
+end-model
+
+end-model

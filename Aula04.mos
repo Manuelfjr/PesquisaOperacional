@@ -1,0 +1,36 @@
+
+model Aula04
+uses "mmxprs"; 
+
+declarations
+	maq = 1..4
+	tar = 1..5
+	tempo: array(maq,tar) of real
+	x: array(maq,tar) of mpvar
+	obj: linctr
+end-declarations
+
+tempo:: [14,5,8,7,9,2,12,6,5,7,7,8,3,9,7,2,4,6,10,6]
+
+forall(i in maq) do
+	sum(j in tar) x(i,j) = 1
+end-do
+
+forall(i in tar) do
+	sum(j in maq) x(j,i) <= 1
+end-do
+
+obj:= sum(i in maq, j in tar) x(i,j)*tempo(i,j)
+
+minimize(obj)
+
+writeln("Begin running model")
+
+forall(i in maq, j in tar) do
+	writeln('x(',i,j,') = ', getsol(x(i,j)))
+end-do
+
+writeln('FO : ', getobjval)
+writeln("End running model")
+
+end-model

@@ -1,0 +1,34 @@
+model fluxo
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+parameters
+ PROJECTDIR='C:\Users\MF032\Documents\P4\PO'
+end-parameters
+declarations
+ nos: range
+ origem=1
+ destino=6
+ tudo=1..6
+ arcos:dynamic array(nos,nos) of integer
+ x:dynamic array(nos,nos) of mpvar
+end-declarations
+initializations from 'fluxo_max.txt'
+arcos
+end-initializations
+forall(i,j in tudo | exists(arcos(i,j))) create(x(i,j))
+forall(i in tudo) do
+ sum(k in tudo)x(k,i) = sum(j in tudo) x(i,j)
+end-do
+forall(i in tudo) do
+ forall(j in tudo)x(i,j) <= arcos(i,j)
+end-do
+fluxo:= x(destino,origem)
+maximize(fluxo)
+writeln("Begin running model")
+!...
+forall(i in tudo, j in tudo | exists(arcos(i,j))) do
+ writeln("valor(",i,j,")= ",getsol(x(i,j)))
+end-do
+writeln("FO: ",getobjval)
+writeln("End running model")
+exportprob(EP_MAX,"",fluxo)
+end-model

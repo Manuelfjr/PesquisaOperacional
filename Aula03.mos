@@ -1,0 +1,41 @@
+model Aula03 
+uses "mmxprs", 'mmsheet';
+
+parameters
+	PROJECTDIR='C:\Users\MF032\Documents\P4\PO'
+end-parameters
+
+declarations
+	fab = 1..3
+	dem = 1..3
+	custo: array(fab,dem) of real
+	capacidade: array(fab) of real
+	demanda: array(dem) of real
+	x: array(fab,dem) of mpvar
+end-declarations
+
+initializations from 'Aula03.txt'
+	custo capacidade demanda
+end-initializations
+
+forall(i in fab) do
+	sum(j in dem) x(i,j) <= capacidade(i)
+end-do
+forall(i in dem) do
+	sum(j in fab) x(j,i) >= demanda(i)
+end-do
+forall(i in fab, j in dem) x(i,j) is_integer
+
+obj:= sum(i in fab, j in dem) x(i,j)*custo(i,j)
+
+minimize(obj)
+
+writeln("Begin running model")
+!...
+forall(i in fab, j in dem) writeln('x(',i,j,') = ', getsol(x(i,j))) 
+
+writeln('FO :', getobjval)
+
+writeln("End running model")
+
+end-model

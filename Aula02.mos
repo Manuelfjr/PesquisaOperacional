@@ -1,0 +1,88 @@
+model Aula02
+	uses 'mmxprs'
+!parameters
+! PROJECTDIR='C:\Users\MF032\Documents\P4\PO'
+!end-parameters
+!declarations
+!	quant_rest = 1..3
+!	quant_prod = 1..4
+!	x : array(quant_prod) of mpvar
+!	A : array(quant_rest, quant_prod) of real
+!	b : array(quant_rest) of real
+!	c : array(quant_prod) of real
+!
+!end-declarations
+!
+!initializations from 'aula02.txt'
+!	A b c
+!end-initializations 
+
+!forall (i in quant_rest) do
+!	sum(j in quant_prod) A(i, j) * x(j) <= b(i)
+!end-do
+
+!maximize(sum(j in quant_prod) x(j) * c(j))
+
+!writeln('x1 : ', getsol(x(1)))
+!writeln('x2 : ', getsol(x(2)))
+!writeln('x3 : ', getsol(x(3)))
+!writeln('x4 : ', getsol(x(4)))
+!writeln('FO : ', getobjval)
+!!!!!
+
+parameters
+ PROJECTDIR='C:\Users\MF032\Documents\P4\PO'
+end-parameters
+(!
+declarations
+	quant_rest = 1..3
+	quant_prod = 1..2
+	x : array(quant_prod) of mpvar
+	A : array(quant_rest, quant_prod) of real
+	b : array(quant_rest) of real
+	c : array(quant_prod) of real
+
+end-declarations
+
+initializations from 'aula02.txt'
+	A b c
+end-initializations 
+
+forall (i in quant_rest) do
+	sum(j in quant_prod) A(i, j) * x(j) <= b(i)
+end-do
+
+maximize(sum(j in quant_prod) x(j) * c(j))
+
+writeln('x1 : ', getsol(x(1)))
+writeln('x2 : ', getsol(x(2)))
+writeln('FO : ', getobjval)
+!)
+declarations
+	quant_rest = 1..2
+	quant_prod = 1..2
+	x : array(quant_prod) of mpvar
+	A1 : array(quant_rest, quant_prod) of real
+	b1 : array(quant_rest) of real
+	c1 : array(quant_prod) of real
+
+end-declarations
+
+initializations from 'aula02.txt'
+	A1 b1 c1
+end-initializations 
+
+forall (i in quant_rest) do
+	sum(j in quant_prod) A1(i, j) * x(j) <= b1(i)
+end-do
+
+obj:= sum(j in quant_prod) x(j) * c1(j)
+maximize(obj)
+
+writeln('x1 : ', getsol(x(1)))
+writeln('x2 : ', getsol(x(2)))
+writeln('FO : ', getobjval)
+
+exportprob(EP_MAX,'',obj)
+
+end-model

@@ -1,0 +1,11 @@
+\ Using Xpress-MP extensions
+Maximize
+ 5 x(1) + 3 x(2)
+
+Subject To
+_R1: 5 x(1) + 2 x(2) <= 10
+_R2: 3 x(1) + 5 x(2) <= 15
+
+Bounds
+
+End

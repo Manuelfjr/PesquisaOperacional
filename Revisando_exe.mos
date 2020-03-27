@@ -1,0 +1,182 @@
+
+!@encoding CP1252
+(!model ModelName
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+!)
+(!
+
+declarations
+	x1,x2,x3,x4:mpvar
+end-declarations
+3 * x1 + 4 * x2 + x3 + 2 * x4 >= 13
+2 * x1 + 3 * x2 + 5 * x3 + 5 * x4 >= 16
+
+minimize(4 * x1 + x2 + x3 + 3 * x4)
+
+writeln('FO :', getobjval)
+writeln('x1 = ', getsol(x1))
+writeln('x2 = ', getsol(x2))
+writeln('x3 = ', getsol(x3))
+writeln('x4 = ', getsol(x4))
+
+end-model
+!)
+(!
+declarations
+	quant_var = 1..4
+	quant_rest = 1..2
+	A: array(quant_rest,quant_var) of real
+	b: array(quant_rest) of real
+	c: array(quant_var) of real
+	x: array(quant_var) of mpvar
+end-declarations 
+
+A:: [3,4,1,2, 2, 3, 5, 5]
+b:: [13, 16]
+c:: [4, 1, 1, 3]
+
+forall(i in quant_rest) do
+	sum(j in quant_var) A(i,j) * x(j) >= b(i)
+end-do
+
+objective:= sum(i in quant_var) x(i) * c(i)
+
+minimize(objective)
+
+writeln('Begin Model')
+
+forall(i in quant_var) do
+	writeln('x', i,'=', getsol(x(i)))
+end-do
+
+writeln('FO:', getobjval)
+
+!)
+(!
+declarations
+	quant_var = 1..2
+	quant_rest = 1..3
+	A: array(quant_rest, quant_var) of real
+	b: array(quant_rest) of real
+	c: array(quant_var) of real
+	x: array(quant_var) of mpvar
+	
+end-declarations
+A:: [5,10,1,1,0,1]
+b:: [50,1,4]
+c:: [-2,-1]
+forall(i in quant_rest) do
+	sum(j in quant_var) A(i,j) * x(j) <= b(i)
+end-do
+obj:= sum(i in quant_var) x(i)*c(i)
+minimize(obj)
+forall(j in quant_var) do
+	writeln('x(',j,') = ', getsol(x(j)))
+end-do
+
+writeln('FO: ', getobjval)
+!)
+(!
+declarations
+	quant_var = 1..2
+	quant_rest = 1..3
+	A: array(quant_rest, quant_var) of real
+	b: array(quant_rest) of real
+	c: array(quant_var) of real
+	x: array(quant_var) of mpvar
+	rest: array(quant_rest) of linctr
+end-declarations
+
+A:: [1,1,1,0,0,1]
+b:: [4,3,2]
+c:: [-5,-2]
+
+forall(i in quant_rest) do
+	rest(i):= sum(j in quant_var) A(i,j) * x(j) <= b(i)
+end-do
+
+obj:= sum(i in quant_var) x(i)*c(i)
+
+minimize(obj)
+
+forall(i in quant_var) do
+	writeln('x(',i,') = ',getsol(x(i)))
+end-do
+
+writeln('FO := ', getobjval)
+!)
+(!
+declarations
+	quant_var = 1..4
+	quant_rest = 1..2
+	A: array(quant_rest,quant_var) of real
+	b: array(quant_rest) of real
+	c: array(quant_var) of real
+	x: array(quant_var) of mpvar
+	rest: array(quant_rest) of linctr
+	obj: linctr
+end-declarations 
+
+A:: [2, 3, 5, 5, 3, 4, 1, 2]
+b:: [16,13]
+c:: [5,1,1,3]
+
+obj:= sum(i in quant_var) x(i)*c(i)
+
+forall(i in quant_rest) do
+	rest(i):= sum(j in quant_var) A(i,j)*x(j) >= b(i)
+end-do
+
+minimize(obj)
+
+forall(i in quant_var) do
+	writeln('x(',i,') = ', getsol(x(i)))
+end-do
+
+forall(i in quant_rest) do
+	writeln('Restrição ', i, ' possui folga de :', getslack(rest(i)))
+end-do
+
+forall(i in quant_rest) do
+	writeln('Valor dual restrição ',i,' = ',getdual(rest(i)))
+end-do
+
+writeln('FO: ', getobjval)
+
+writeln('Finish Model')
+!)
+model Revisando2
+uses 'mmxprs'
+
+parameters
+	PROJECTDIR='C:\Users\MF032\Documents\P4\PO'
+end-parameters
+
+declarations
+	quant_var = 1..2
+	quant_rest = 1..2
+	A: array(quant_rest,quant_var) of real
+	b: array(quant_rest) of real
+	c: array(quant_var) of real
+	x: array(quant_var) of mpvar
+end-declarations
+
+initializations from 'revisando.txt.txt'
+	A b c
+end-initializations
+
+forall(i in quant_rest) do
+	sum(j in quant_var) A(i,j)*x(j) <= b(i)
+end-do
+
+obj:= sum(i in quant_var) c(i)*x(i)
+
+maximize(obj)
+
+forall(i in quant_var) do 
+	writeln('x(',i,') = ', getsol(x(i)))
+end-do
+
+exportprob(EP_MAX, 'exercicio1.txt', obj)
+
+end-model

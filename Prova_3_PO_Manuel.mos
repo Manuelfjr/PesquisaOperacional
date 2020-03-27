@@ -1,0 +1,54 @@
+model questao01
+uses "mmxprs"; 
+
+parameters
+	PROJECTDIR='C:\Users\MF032\Documents\P4\PO'
+end-parameters
+
+declarations
+	nos: range
+	origem=1
+	destino=8
+	meio=2..7
+	tudo=1..8
+	arcos:dynamic array(nos,nos) of integer
+	x: dynamic array(nos,nos) of mpvar
+end-declarations
+
+initializations from 'prova03.txt'
+	arcos
+end-initializations
+
+forall(i,j in tudo | exists(arcos(i,j))) create(x(i,j))
+	- sum(i in meio) x(origem,i) = -1
+
+sum (j in meio) x(j,destino) = 1
+
+forall(i in meio) do
+	sum(k in nos)x(k,i) = sum(j in nos) x(i,j)
+end-do
+
+custo:= sum(i in tudo, j in tudo) arcos(i,j)*x(i,j)
+
+minimize(custo)
+
+writeln
+writeln("Begin running model")
+writeln
+
+forall(i in tudo, j in tudo | exists(arcos(i,j))) do
+	writeln("valor(",i,j,")= ",getsol(x(i,j)))
+end-do
+
+writeln
+writeln("FO: ",getobjval)
+writeln
+
+! Verifica-se que o caminho mínimo do problema é X(1,3) --> X(3,5) --> X(5,8),
+! Onde o valor da função objetivo é 2450
+
+writeln("End running model")
+
+exportprob(EP_MIN,"",custo)
+
+end-model
